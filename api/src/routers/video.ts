@@ -19,18 +19,25 @@ export const videoRouter = router({
     .input(
       z.object({
         limit: z.number().min(1).max(100).default(20),
-        cursor: z.string().optional(), // video id of the last item on the previous page
+        cursor: z.string().optional(),
+        search: z.string().optional(),
         tag: z.string().optional(),
       }).optional()
     )
     .query(async ({ input }) => {
-      const { limit = 20, cursor, tag } = input ?? {};
+      const { limit = 20, cursor, search, tag } = input ?? {};
+
+      const where = {
+        ...(search && { title: { contains: search } }),
+        ...(tag && { tags: { some: { name: tag } } }),
+      };
 
       const videos = await db.video.findMany({
-        where: tag ? { tags: { some: { name: tag } } } : undefined,
+        where,
         include: videoInclude,
         take: limit + 1, // fetch one extra to know if there's a next page
         cursor: cursor ? { id: cursor } : undefined,
+        skip: cursor ? 1 : undefined, // skip the cursor item itself
         orderBy: { createdAt: 'desc' },
       });
 
