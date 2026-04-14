@@ -5,7 +5,17 @@ import type { AppAction } from './actions';
 export function rootReducer(state: AppState = initialState, action: AppAction): AppState {
   return produce(state, (draft) => {
     switch (action.type) {
+      case '[routing] navigated':
+        draft.route = action.payload.route;
+        // Sync filters from URL so back/forward and deep links restore state
+        if (action.payload.route.name === 'home') {
+          draft.filters.search = action.payload.route.query.search ?? '';
+          draft.filters.activeTag = action.payload.route.query.tag ?? '';
+        }
+        break;
+
       case '[ui] search input changed':
+        // Update immediately so the input stays responsive while URL sync debounces
         draft.filters.search = action.payload.search;
         break;
 
@@ -42,6 +52,16 @@ export function rootReducer(state: AppState = initialState, action: AppAction): 
         if (!draft.videos.items.some((v) => v.id === action.payload.video.id)) {
           draft.videos.items.unshift(action.payload.video);
         }
+        break;
+
+      case '[effects] video detail fetch started':
+        draft.videoDetail.loading = true;
+        draft.videoDetail.video = null;
+        break;
+
+      case '[effects] video detail fetched':
+        draft.videoDetail.loading = false;
+        draft.videoDetail.video = action.payload.video;
         break;
     }
   });
