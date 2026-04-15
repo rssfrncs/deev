@@ -27,8 +27,11 @@ function sortParam(sortOrder: string) {
 
 function* syncSearchToUrl() {
   yield* delay(300);
-  const { search, activeTag, sortOrder } = yield* select((s: AppState) => s.filters);
-  history.push(buildUrl({ name: 'home', query: { search: search || undefined, tag: activeTag || undefined, sort: sortParam(sortOrder) } }));
+  const { search } = yield* select((s: AppState) => s.filters);
+  const p = new URLSearchParams(history.location.search);
+  if (search) p.set('search', search); else p.delete('search');
+  const qs = p.toString();
+  history.push(qs ? `/?${qs}` : '/');
 }
 
 function* syncTagToUrl() {
@@ -42,8 +45,11 @@ function* clearTagFromUrl() {
 }
 
 function* syncSortToUrl(action: Extract<AppAction, { type: '[ui] sort order changed' }>) {
-  const { search, activeTag } = yield* select((s: AppState) => s.filters);
-  history.push(buildUrl({ name: 'home', query: { search: search || undefined, tag: activeTag || undefined, sort: sortParam(action.payload.sortOrder) } }));
+  const p = new URLSearchParams(history.location.search);
+  const sort = sortParam(action.payload.sortOrder);
+  if (sort) p.set('sort', sort); else p.delete('sort');
+  const qs = p.toString();
+  history.push(qs ? `/?${qs}` : '/');
 }
 
 function* navigateHomeWithTag(action: Extract<AppAction, { type: '[ui] detail tag filter selected' }>) {

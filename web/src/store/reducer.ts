@@ -51,7 +51,6 @@ export function rootReducer(state: AppState = initialState, action: AppAction): 
           draft.videos.error = null;
           draft.videos.items = [];
           draft.videos.nextCursor = null;
-          draft.videos.total = 0;
         }
         break;
 

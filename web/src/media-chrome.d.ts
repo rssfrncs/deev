@@ -8,7 +8,7 @@ type MCElement = React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTML
   slot?: string;
 };
 
-declare global {
+declare module 'react' {
   namespace JSX {
     interface IntrinsicElements {
       'hls-video': MCElement;

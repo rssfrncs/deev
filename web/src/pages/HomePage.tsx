@@ -47,12 +47,6 @@ export function HomePage() {
           />
         </div>
 
-        {total > 0 && (
-          <span className="self-center text-xs text-ink-tertiary whitespace-nowrap" aria-live="polite" aria-atomic="true">
-            {total.toLocaleString()} videos
-          </span>
-        )}
-
         <button
           onClick={() => dispatch({ type: '[ui] sort order changed', payload: { sortOrder: sortOrder === 'desc' ? 'asc' : 'desc' } })}
           aria-label={`Sort by ${sortOrder === 'desc' ? 'oldest' : 'newest'} first`}
@@ -111,6 +105,12 @@ export function HomePage() {
             );
           })}
         </div>
+      )}
+
+      {total > 0 && (
+        <p className="text-xs text-ink-tertiary text-right mb-4 tabular-nums" aria-live="polite" aria-atomic="true">
+          {total.toLocaleString()} videos
+        </p>
       )}
 
       {/* Grid */}
