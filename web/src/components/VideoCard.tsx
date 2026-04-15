@@ -15,7 +15,10 @@ export function VideoCard({ video }: { video: Video }) {
   // Instead: when hovered, attach a document-level pointermove listener and
   // check containment on every move. Guaranteed to clear hovered state.
   useEffect(() => {
-    if (!hovered) return;
+    if (!hovered) {
+      setVideoReady(false);
+      return;
+    }
     function onMove(e: PointerEvent) {
       if (cardRef.current && !cardRef.current.contains(e.target as Node)) {
         setHovered(false);
@@ -38,22 +41,25 @@ export function VideoCard({ video }: { video: Video }) {
         aria-label={`Watch ${video.title}`}
       >
         <div className="relative rounded-card overflow-hidden bg-surface aspect-video">
-          {hovered ? (
-            <div className="absolute inset-0">
-              <HlsPlayer variant="card" />
+          {/* Thumbnail — always present as base layer */}
+          <img
+            src={video.thumbnailUrl}
+            alt=""
+            loading="lazy"
+            className={`w-full h-full object-cover transition-transform duration-300 ${hovered ? 'scale-105' : 'group-hover:scale-105'}`}
+          />
+          <span className="absolute bottom-2 right-2 bg-ink/70 text-canvas text-xs font-medium px-1.5 py-0.5 rounded" aria-hidden="true">
+            {formatDuration(video.duration)}
+          </span>
+
+          {/* Video layer — mounts on hover, fades in once ready */}
+          {hovered && (
+            <div
+              className="absolute inset-0 transition-opacity duration-500"
+              style={{ opacity: videoReady ? 1 : 0 }}
+            >
+              <HlsPlayer variant="card" onReady={() => setVideoReady(true)} />
             </div>
-          ) : (
-            <>
-              <img
-                src={video.thumbnailUrl}
-                alt=""
-                loading="lazy"
-                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-              />
-              <span className="absolute bottom-2 right-2 bg-ink/70 text-canvas text-xs font-medium px-1.5 py-0.5 rounded" aria-hidden="true">
-                {formatDuration(video.duration)}
-              </span>
-            </>
           )}
         </div>
         <div className="mt-2.5 px-0.5">

@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { useAppSelector, useAppDispatch } from '../store/hooks';
 import { HlsPlayer } from '../HlsPlayer';
 import { formatDuration, formatViews } from '../utils/format';
@@ -10,6 +11,8 @@ export function VideoDetailPage() {
   const relatedVideos = useAppSelector((s) =>
     relatedIds.map((rid) => s.videoCache[rid]).filter(Boolean) as Video[]
   );
+  const [videoReady, setVideoReady] = useState(false);
+  useEffect(() => { setVideoReady(false); }, [id]);
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-8">
@@ -57,10 +60,16 @@ export function VideoDetailPage() {
           {/* Left: player only */}
           <div className="flex-[2] min-w-0 w-full">
             <div
-              className="rounded-card overflow-hidden bg-surface w-full"
+              className="relative rounded-card overflow-hidden bg-surface w-full"
               style={{ aspectRatio: '16/9', maxHeight: 'calc(100svh - 12rem)' }}
             >
-              <HlsPlayer variant="detail" />
+              <img src={video.thumbnailUrl} alt="" className="absolute inset-0 w-full h-full object-cover" />
+              <div
+                className="absolute inset-0 transition-opacity duration-500"
+                style={{ opacity: videoReady ? 1 : 0 }}
+              >
+                <HlsPlayer variant="detail" onReady={() => setVideoReady(true)} />
+              </div>
             </div>
           </div>
 
@@ -77,8 +86,7 @@ export function VideoDetailPage() {
                     <button
                       key={tag}
                       onClick={() => {
-                        dispatch({ type: '[ui] tag filter selected', payload: { tag } });
-                        dispatch({ type: '[ui] navigate home' });
+                        dispatch({ type: '[ui] detail tag filter selected', payload: { tag } });
                       }}
                       aria-label={`Filter by ${tag}`}
                       className="text-xs bg-surface hover:bg-surface-hover text-ink-secondary px-3 py-1.5 rounded-pill transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-veed-green"

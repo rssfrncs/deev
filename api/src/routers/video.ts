@@ -49,16 +49,16 @@ export const videoRouter = router({
         limit: z.number().min(1).max(100).default(10),
         cursor: z.string().optional(),
         search: z.string().optional(),
-        tag: z.string().optional(),
+        tags: z.array(z.string()).optional(),
         order: z.enum(['asc', 'desc']).default('desc'),
       }).optional()
     )
     .query(async ({ input }) => {
-      const { limit = 10, cursor, search, tag, order = 'desc' } = input ?? {};
+      const { limit = 10, cursor, search, tags, order = 'desc' } = input ?? {};
 
       const where = {
         ...(search && { title: { contains: search } }),
-        ...(tag && { tags: { some: { name: tag } } }),
+        ...(tags?.length && { tags: { some: { name: { in: tags } } } }),
       };
 
       const [videos, total] = await Promise.all([

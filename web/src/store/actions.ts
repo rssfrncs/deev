@@ -11,6 +11,7 @@ export type AppAction =
   | { type: '[ui] create video submitted'; payload: { title: string; duration: number; tags: string[] } }
   | { type: '[ui] video selected'; payload: { id: string } }
   | { type: '[ui] navigate home' }
+  | { type: '[ui] detail tag filter selected'; payload: { tag: string } }
   // Routing — location changes
   | { type: '[routing] navigated'; payload: { route: Route; historyAction: 'push' | 'pop' | 'replace' } }
   // Effects — async results

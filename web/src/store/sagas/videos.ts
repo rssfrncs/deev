@@ -36,7 +36,7 @@ function* fetchVideosSaga(action: Extract<AppAction, { type: '[routing] navigate
   if (action.payload.route.name !== 'home') return;
 
   const controller = new AbortController();
-  const { search, tag, sort } = action.payload.route.query;
+  const { search, tags, sort } = action.payload.route.query;
   const order = sort === 'asc' ? 'asc' as const : 'desc' as const;
   const preserveItems = action.payload.historyAction === 'pop';
 
@@ -45,7 +45,7 @@ function* fetchVideosSaga(action: Extract<AppAction, { type: '[routing] navigate
   try {
     const result = yield* call(() =>
       trpc.video.list.query(
-        { limit: DEFAULT_LIMIT, search: search || undefined, tag: tag || undefined, order },
+        { limit: DEFAULT_LIMIT, search: search || undefined, tags: tags?.length ? tags : undefined, order },
         { signal: controller.signal }
       )
     );
@@ -94,14 +94,14 @@ function* fetchVideoDetailSaga(action: Extract<AppAction, { type: '[routing] nav
 function* loadMoreSaga() {
   const controller = new AbortController();
   const { nextCursor } = yield* select((state: AppState) => state.videos);
-  const { search, activeTag, sortOrder } = yield* select((state: AppState) => state.filters);
+  const { search, activeTags, sortOrder } = yield* select((state: AppState) => state.filters);
 
   if (!nextCursor) return;
 
   try {
     const result = yield* call(() =>
       trpc.video.list.query(
-        { limit: DEFAULT_LIMIT, cursor: nextCursor, search: search || undefined, tag: activeTag || undefined, order: sortOrder },
+        { limit: DEFAULT_LIMIT, cursor: nextCursor, search: search || undefined, tags: activeTags.length ? activeTags : undefined, order: sortOrder },
         { signal: controller.signal }
       )
     );

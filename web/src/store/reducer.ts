@@ -9,7 +9,7 @@ export function rootReducer(state: AppState = initialState, action: AppAction): 
         draft.route = action.payload.route;
         if (action.payload.route.name === 'home') {
           draft.filters.search = action.payload.route.query.search ?? '';
-          draft.filters.activeTag = action.payload.route.query.tag ?? '';
+          draft.filters.activeTags = action.payload.route.query.tags ?? [];
           draft.filters.sortOrder = action.payload.route.query.sort === 'asc' ? 'asc' : 'desc';
         }
         break;
@@ -18,12 +18,23 @@ export function rootReducer(state: AppState = initialState, action: AppAction): 
         draft.filters.search = action.payload.search;
         break;
 
-      case '[ui] tag filter selected':
-        draft.filters.activeTag = action.payload.tag;
+      case '[ui] tag filter selected': {
+        const tag = action.payload.tag;
+        const idx = draft.filters.activeTags.indexOf(tag);
+        if (idx === -1) {
+          draft.filters.activeTags.push(tag);
+        } else {
+          draft.filters.activeTags.splice(idx, 1);
+        }
+        break;
+      }
+
+      case '[ui] detail tag filter selected':
+        draft.filters.activeTags = [action.payload.tag];
         break;
 
       case '[ui] tag filter cleared':
-        draft.filters.activeTag = '';
+        draft.filters.activeTags = [];
         break;
 
       case '[ui] sort order changed':
@@ -84,9 +95,9 @@ export function rootReducer(state: AppState = initialState, action: AppAction): 
       case '[effects] video received via subscription': {
         const { video } = action.payload;
         draft.videoCache[video.id] = video;
-        const { search, activeTag } = draft.filters;
+        const { search, activeTags } = draft.filters;
         const matchesSearch = !search || video.title.toLowerCase().includes(search.toLowerCase());
-        const matchesTag = !activeTag || video.tags.includes(activeTag);
+        const matchesTag = activeTags.length === 0 || video.tags.some((t) => activeTags.includes(t));
         if (matchesSearch && matchesTag && !draft.videos.items.some((v) => v.id === video.id)) {
           draft.videos.items.unshift(video);
           draft.videos.total += 1;

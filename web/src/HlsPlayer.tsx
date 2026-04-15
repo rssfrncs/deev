@@ -40,7 +40,7 @@ const controlBarStyle: React.CSSProperties = {
   border: '1px solid rgba(255,255,255,0.6)',
 };
 
-type Props = { variant: 'card'; onReady?: () => void } | { variant: 'detail' };
+type Props = { variant: 'card'; onReady?: () => void } | { variant: 'detail'; onReady?: () => void };
 
 export function HlsPlayer(props: Props) {
   const elementRef = useRef<Element | null>(null);
@@ -77,9 +77,16 @@ export function HlsPlayer(props: Props) {
     );
   }
 
+  const detailRef = useCallback((el: Element | null) => {
+    if (el && props.variant === 'detail' && props.onReady) {
+      el.addEventListener('canplay', props.onReady, { once: true });
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <MediaController style={{ ...theme, width: '100%', height: '100%' }}>
-      <hls-video slot="media" src={DEMO_HLS_SRC} playsinline style={{ width: '100%', height: '100%', objectFit: 'cover' } as React.CSSProperties} />
+      <hls-video autoplay ref={detailRef} slot="media" src={DEMO_HLS_SRC} playsinline style={{ width: '100%', height: '100%', objectFit: 'cover' } as React.CSSProperties} />
       <MediaControlBar style={controlBarStyle}>
         <MediaPlayButton style={{ padding: '0 8px' }} />
         <MediaTimeDisplay />

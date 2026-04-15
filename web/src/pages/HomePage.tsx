@@ -5,7 +5,7 @@ import { VideoCard } from '../components/VideoCard';
 export function HomePage() {
   const dispatch = useAppDispatch();
   const { items, nextCursor, total, loading, error } = useAppSelector((s) => s.videos);
-  const { search, activeTag, sortOrder } = useAppSelector((s) => s.filters);
+  const { search, activeTags, sortOrder } = useAppSelector((s) => s.filters);
   const topTags = useAppSelector((s) => s.topTags);
 
   const sentinelRef = useRef<HTMLDivElement>(null);
@@ -75,28 +75,27 @@ export function HomePage() {
         </div>
       ) : (
         <div className="flex gap-2 mb-8 overflow-x-auto pb-1 scrollbar-none">
-          {/* If active tag isn't in the top list, show it first so it's always dismissible */}
-          {activeTag && !topTags.some((t) => t.name === activeTag) && (
-            <button
-              onClick={() => dispatch({ type: '[ui] tag filter cleared' })}
-              aria-pressed={true}
-              aria-label={`Remove ${activeTag} filter`}
-              className="animate-tag-enter flex-shrink-0 flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-pill border transition-colors whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-veed-green bg-veed-green border-veed-green text-ink"
-            >
-              {activeTag}
-              <span aria-hidden="true" className="opacity-60 text-[10px]">✕</span>
-            </button>
-          )}
+          {/* Active tags not in the top list — always show so they're dismissible */}
+          {activeTags
+            .filter((t) => !topTags.some((tt) => tt.name === t))
+            .map((tag) => (
+              <button
+                key={tag}
+                onClick={() => dispatch({ type: '[ui] tag filter selected', payload: { tag } })}
+                aria-pressed={true}
+                aria-label={`Remove ${tag} filter`}
+                className="animate-tag-enter flex-shrink-0 flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-pill border transition-colors whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-veed-green bg-veed-green border-veed-green text-ink"
+              >
+                {tag}
+                <span aria-hidden="true" className="opacity-60 text-[10px]">✕</span>
+              </button>
+            ))}
           {topTags.map((tag, i) => {
-            const isActive = activeTag === tag.name;
+            const isActive = activeTags.includes(tag.name);
             return (
               <button
                 key={tag.name}
-                onClick={() => dispatch(
-                  isActive
-                    ? { type: '[ui] tag filter cleared' }
-                    : { type: '[ui] tag filter selected', payload: { tag: tag.name } }
-                )}
+                onClick={() => dispatch({ type: '[ui] tag filter selected', payload: { tag: tag.name } })}
                 aria-pressed={isActive}
                 aria-label={`${isActive ? 'Remove' : 'Filter by'} ${tag.name}`}
                 className={`animate-tag-enter flex-shrink-0 flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-pill border transition-colors whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-veed-green

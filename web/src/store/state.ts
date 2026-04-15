@@ -15,7 +15,7 @@ export type VideosState = {
 
 export type FiltersState = {
   search: string;
-  activeTag: string;
+  activeTags: string[];
   sortOrder: 'asc' | 'desc';
 };
 
@@ -49,7 +49,7 @@ export const initialState: AppState = {
   },
   filters: {
     search: '',
-    activeTag: '',
+    activeTags: [],
     sortOrder: 'desc',
   },
   videoCache: {},

@@ -31,9 +31,9 @@ function* syncSearchToUrl() {
   history.push(buildUrl({ name: 'home', query: { search: search || undefined, tag: activeTag || undefined, sort: sortParam(sortOrder) } }));
 }
 
-function* syncTagToUrl(action: Extract<AppAction, { type: '[ui] tag filter selected' }>) {
-  const { search, sortOrder } = yield* select((s: AppState) => s.filters);
-  history.push(buildUrl({ name: 'home', query: { search: search || undefined, tag: action.payload.tag, sort: sortParam(sortOrder) } }));
+function* syncTagToUrl() {
+  const { search, activeTags, sortOrder } = yield* select((s: AppState) => s.filters);
+  history.push(buildUrl({ name: 'home', query: { search: search || undefined, tags: activeTags.length ? activeTags : undefined, sort: sortParam(sortOrder) } }));
 }
 
 function* clearTagFromUrl() {
@@ -44,6 +44,11 @@ function* clearTagFromUrl() {
 function* syncSortToUrl(action: Extract<AppAction, { type: '[ui] sort order changed' }>) {
   const { search, activeTag } = yield* select((s: AppState) => s.filters);
   history.push(buildUrl({ name: 'home', query: { search: search || undefined, tag: activeTag || undefined, sort: sortParam(action.payload.sortOrder) } }));
+}
+
+function* navigateHomeWithTag(action: Extract<AppAction, { type: '[ui] detail tag filter selected' }>) {
+  const { search, sortOrder } = yield* select((s: AppState) => s.filters);
+  history.push(buildUrl({ name: 'home', query: { search: search || undefined, tags: [action.payload.tag], sort: sortParam(sortOrder) } }));
 }
 
 function navigateToVideo(action: Extract<AppAction, { type: '[ui] video selected' }>) {
@@ -69,6 +74,7 @@ export function* routingSaga() {
   yield* takeEvery('[ui] tag filter selected', syncTagToUrl);
   yield* takeEvery('[ui] tag filter cleared', clearTagFromUrl);
   yield* takeEvery('[ui] sort order changed', syncSortToUrl);
+  yield* takeEvery('[ui] detail tag filter selected', navigateHomeWithTag);
   yield* takeEvery('[ui] video selected', navigateToVideo);
   yield* takeEvery('[ui] navigate home', navigateToHome);
 
