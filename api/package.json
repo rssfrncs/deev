@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "scripts": {
     "dev": "tsx --tsconfig tsconfig.json src/index.ts",
-    "build": "tsc",
+    "build": "prisma generate && tsc",
+    "start": "prisma migrate deploy && npx tsx prisma/seed.ts && node dist/src/index.js",
     "db:migrate": "prisma migrate dev",
     "db:seed": "tsx prisma/seed.ts",
     "db:studio": "prisma studio"

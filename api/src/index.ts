@@ -1,8 +1,10 @@
+import 'dotenv/config';
 import Fastify from 'fastify';
 import cors from '@fastify/cors';
 import { fastifyTRPCPlugin, FastifyTRPCPluginOptions } from '@trpc/server/adapters/fastify';
 import { appRouter, AppRouter } from './appRouter';
 
+const PORT = parseInt(process.env.PORT ?? '3000', 10);
 const server = Fastify({ logger: true });
 
 async function main() {
@@ -15,8 +17,8 @@ async function main() {
     },
   } satisfies FastifyTRPCPluginOptions<AppRouter>);
 
-  await server.listen({ port: 3000, host: '0.0.0.0' });
-  console.log('Server listening on http://localhost:3000');
+  await server.listen({ port: PORT, host: '0.0.0.0' });
+  console.log(`Server listening on port ${PORT}`);
 }
 
 main().catch((err) => {

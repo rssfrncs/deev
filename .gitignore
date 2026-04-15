@@ -1,5 +1,15 @@
 node_modules
-# Keep environment variables out of version control
 .env
 
-/src/generated/prisma
+# Build output
+dist
+api/dist
+
+# SQLite databases
+*.db
+*.db-shm
+*.db-wal
+
+# Prisma generated client
+src/generated/prisma
+api/node_modules/.prisma
