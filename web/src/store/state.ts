@@ -7,24 +7,34 @@ export type Video = VideoList['items'][number];
 export type VideosState = {
   items: Video[];
   nextCursor: string | null;
+  total: number;
   loading: boolean;
+  creating: boolean;
+  error: string | null;
 };
 
 export type FiltersState = {
   search: string;
   activeTag: string;
+  sortOrder: 'asc' | 'desc';
 };
 
 export type VideoDetailState = {
-  video: Video | null;
+  id: string | null;
   loading: boolean;
+  error: string | null;
+  relatedIds: string[];
 };
+
+export type Tag = { name: string; count: number };
 
 export type AppState = {
   route: Route;
   videos: VideosState;
+  videoCache: Record<string, Video>;
   filters: FiltersState;
   videoDetail: VideoDetailState;
+  topTags: Tag[];
 };
 
 export const initialState: AppState = {
@@ -32,14 +42,22 @@ export const initialState: AppState = {
   videos: {
     items: [],
     nextCursor: null,
+    total: 0,
     loading: false,
+    creating: false,
+    error: null,
   },
   filters: {
     search: '',
     activeTag: '',
+    sortOrder: 'desc',
   },
+  videoCache: {},
   videoDetail: {
-    video: null,
+    id: null,
     loading: false,
+    error: null,
+    relatedIds: [],
   },
+  topTags: [],
 };

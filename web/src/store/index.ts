@@ -13,5 +13,8 @@ sagaMiddleware.run(rootSaga);
 // Dispatch initial route after all sagas have started their watchers
 store.dispatch({
   type: '[routing] navigated' as const,
-  payload: { route: matchRoute(window.location.pathname, window.location.search) },
+  payload: {
+    route: matchRoute(window.location.pathname, window.location.search),
+    historyAction: 'push' as const,
+  },
 });

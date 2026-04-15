@@ -5,38 +5,57 @@ import { matchRoute, buildUrl, type Route } from './routes';
 import type { AppAction } from '../actions';
 import type { AppState } from '../state';
 
+type HistoryEvent = {
+  route: Route;
+  historyAction: 'push' | 'pop' | 'replace';
+};
+
 function createHistoryChannel() {
-  return eventChannel<Route>((emit) =>
-    history.listen(({ location }) => {
-      emit(matchRoute(location.pathname, location.search));
+  return eventChannel<HistoryEvent>((emit) =>
+    history.listen(({ location, action }) => {
+      emit({
+        route: matchRoute(location.pathname, location.search),
+        historyAction: action.toLowerCase() as 'push' | 'pop' | 'replace',
+      });
     })
   );
 }
 
+function sortParam(sortOrder: string) {
+  return sortOrder !== 'desc' ? sortOrder : undefined;
+}
+
 function* syncSearchToUrl() {
   yield* delay(300);
-  const { search, activeTag } = yield* select((s: AppState) => s.filters);
-  history.replace(buildUrl({ name: 'home', query: { search: search || undefined, tag: activeTag || undefined } }));
+  const { search, activeTag, sortOrder } = yield* select((s: AppState) => s.filters);
+  history.push(buildUrl({ name: 'home', query: { search: search || undefined, tag: activeTag || undefined, sort: sortParam(sortOrder) } }));
 }
 
 function* syncTagToUrl(action: Extract<AppAction, { type: '[ui] tag filter selected' }>) {
-  const { search } = yield* select((s: AppState) => s.filters);
-  history.push(buildUrl({ name: 'home', query: { search: search || undefined, tag: action.payload.tag } }));
+  const { search, sortOrder } = yield* select((s: AppState) => s.filters);
+  history.push(buildUrl({ name: 'home', query: { search: search || undefined, tag: action.payload.tag, sort: sortParam(sortOrder) } }));
 }
 
 function* clearTagFromUrl() {
-  const { search } = yield* select((s: AppState) => s.filters);
-  history.push(buildUrl({ name: 'home', query: { search: search || undefined } }));
+  const { search, sortOrder } = yield* select((s: AppState) => s.filters);
+  history.push(buildUrl({ name: 'home', query: { search: search || undefined, sort: sortParam(sortOrder) } }));
 }
 
-function* navigateToVideo(action: Extract<AppAction, { type: '[ui] video selected' }>) {
-  history.push(`/video/${action.payload.id}`);
+function* syncSortToUrl(action: Extract<AppAction, { type: '[ui] sort order changed' }>) {
+  const { search, activeTag } = yield* select((s: AppState) => s.filters);
+  history.push(buildUrl({ name: 'home', query: { search: search || undefined, tag: activeTag || undefined, sort: sortParam(action.payload.sortOrder) } }));
 }
 
-function* navigateToHome() {
-  // Go back if there's a previous entry so filters/scroll restore correctly.
-  // Fall back to push when the user arrived via a direct/deep link.
-  if (history.index > 0) {
+function navigateToVideo(action: Extract<AppAction, { type: '[ui] video selected' }>) {
+  // Store fromApp so navigateToHome knows it can safely go back
+  history.push(`/video/${action.payload.id}`, { fromApp: true });
+}
+
+function navigateToHome() {
+  // If we navigated here from within the app, go back so URL (sort, tag, search)
+  // is restored correctly. Fall back to push for direct/deep-link arrivals.
+  const state = history.location.state as { fromApp?: boolean } | null;
+  if (state?.fromApp) {
     history.back();
   } else {
     history.push('/');
@@ -49,11 +68,12 @@ export function* routingSaga() {
   yield* takeLatest('[ui] search input changed', syncSearchToUrl);
   yield* takeEvery('[ui] tag filter selected', syncTagToUrl);
   yield* takeEvery('[ui] tag filter cleared', clearTagFromUrl);
+  yield* takeEvery('[ui] sort order changed', syncSortToUrl);
   yield* takeEvery('[ui] video selected', navigateToVideo);
   yield* takeEvery('[ui] navigate home', navigateToHome);
 
   while (true) {
-    const route = yield* take(channel);
-    yield* put<AppAction>({ type: '[routing] navigated', payload: { route } });
+    const { route, historyAction } = yield* take(channel);
+    yield* put<AppAction>({ type: '[routing] navigated', payload: { route, historyAction } });
   }
 }
