@@ -1,5 +1,10 @@
 # 📺 Video Library Dashboard
 
+## Demo
+
+<video src="./deev-demo.mp4" controls style="max-width: 100%; border-radius: 8px;" title="Demo video for the Video Library Dashboard"></video>
+
+
 ## Live https://deev.up.railway.app/
 
 ### ⚡ Professional Event-Driven Full-Stack System
