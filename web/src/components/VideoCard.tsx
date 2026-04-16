@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, lazy, Suspense } from 'react';
 import { useAppDispatch } from '../store/hooks';
 
-const HlsPlayerCard = lazy(() => import('../HlsPlayer').then(m => ({ default: m.HlsPlayerCard })));
+const HlsPlayerCard = lazy(() => import('./HlsPlayer').then(m => ({ default: m.HlsPlayerCard })));
 import { formatDuration, formatViews, formatDate } from '../utils/format';
 import type { Video } from '../store/state';
 
