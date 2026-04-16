@@ -31,23 +31,30 @@ A high-performance video management platform utilizing a **tRPC** backend with *
 
 ## 🏁 Getting Started
 
-### 1. Installation
+### 1. Install Dependencies
 ```bash
-npm install
+cd api && npm install
+cd ../web && npm install
 ```
 
 ### 2. Backend Setup
 ```bash
-cd apps/api
+cd api
 npm run db:migrate   # Initialize SQLite schema
 npm run db:seed      # Seed with provided dataset
-npm run dev          # Start tRPC server
+npm run dev          # Start tRPC server on :3000
 ```
 
 ### 3. Frontend Setup
 ```bash
-cd apps/web
-npm run dev          # Start Vite SPA
+cd web
+npm run dev          # Start Vite SPA on :5173
+```
+
+### 4. E2E Tests (optional)
+```bash
+cd web
+npx playwright test
 ```
 
 ---
@@ -57,7 +64,7 @@ npm run dev          # Start Vite SPA
 ### View Counter Buffering
 To ensure the SQLite database remains performant, view increments are not written immediately. Instead, they are accumulated in memory and flushed in batches, reducing the write load from $N$ to 1 per interval.
 
-### Pagiation
+### Pagination
 
 Pagination was a core requirement due to the list functionality. Cursor based pagination is used to allow more dynamic infinite scroll implementations. 
 
@@ -76,12 +83,19 @@ SQLite was picked for it's simplicity. In production / future work we would swap
 ## 🧪 Testing
 The project includes **Playwright E2E tests** to validate critical user flows. By testing the integration between the tRPC procedures and the live SQLite database, we ensure that the core "Happy Path" (listing, filtering, and creating videos) is functional in a production-like environment.
 
+### Non-Functional Quality
+* **Input Validation:** All tRPC procedures are validated with **Zod schemas** on both input and output, ensuring type-safety at the API boundary.
+* **Error Handling:** Saga catch paths surface meaningful errors in the UI — a banner on list load failure, an inline alert on create failure.
+* **Loading States:** The video grid renders an animated skeleton while data is in-flight, and the create button shows a spinner during submission.
+
 ---
 
 ## 🤖 AI Usage & Reflection
 
 ### Tools Used
 * **Claude Code:** Primary architectural partner and code generator.
+
+> Conversation logs are in [`ai-conversations/claude-code-logs.md`](./ai-conversations/claude-code-logs.md).
 
 ### Integration Workflow
 I treat AI as a mid-level collaborator. My workflow has shifted toward **heavy upfront planning and detailed prompting**. 
@@ -100,3 +114,5 @@ The use of AI has radically reduced the "manual labor" of development. By automa
 * **Redis Integration:** Swap the in-memory `viewBuffer` for a Redis `INCR` implementation to support multi-node scaling.
 * **PostgreSQL Migration:** Move to a relational cloud database on Railway for production-grade persistence.
 * **Sentry/Datadog Integration:** Forward the `[ui]` and `[effects]` action streams to an external observability platform for real-time monitoring and session replay.
+* **Virtualisation**: Video list needs to be virtualised to allow for better scalability with large video library.
+* **Scroll restoration**: Add scroll restoration for smoother ux navigating back and forth between list and details view.
