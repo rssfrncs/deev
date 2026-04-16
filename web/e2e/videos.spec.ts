@@ -1,5 +1,10 @@
 import { test, expect } from '@playwright/test';
-import { createVideo } from './helpers';
+import seed from '../../api/seed.json' with { type: 'json' };
+
+const sortedVideos = [...seed.videos].sort(
+  (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+);
+const [firstVideo] = sortedVideos;
 
 test('shows error when the video list fails to load', async ({ page }) => {
   // Simulate a network failure so the saga's catch path fires
@@ -10,14 +15,24 @@ test('shows error when the video list fails to load', async ({ page }) => {
   await expect(page.getByText('Failed to load videos')).toBeVisible();
 });
 
-test('listing page loads and displays videos', async ({ page, request }) => {
-  const v1 = await createVideo(request, { title: 'Getting Started with React', duration: 120, tags: ['react'] });
-  const v2 = await createVideo(request, { title: 'TypeScript Tips', duration: 90, tags: ['typescript'] });
-
+test('listing page loads and displays videos', async ({ page }) => {
   await page.goto('/');
 
-  await expect(page.getByText(v1.title)).toBeVisible();
-  await expect(page.getByText(v2.title)).toBeVisible();
+  await expect(page.getByText(sortedVideos[0].title)).toBeVisible();
+  await expect(page.getByText(sortedVideos[1].title)).toBeVisible();
+});
+
+test('shows error when creating a video fails', async ({ page }) => {
+  await page.goto('/');
+
+  await page.route('**/trpc/video.create**', (route) => route.abort());
+
+  await page.getByRole('button', { name: '+ Add video' }).click();
+  await page.getByPlaceholder('Video title').fill('Test Video');
+  await page.getByPlaceholder('Duration (s)').fill('60');
+  await page.getByRole('button', { name: 'Add video', exact: true }).click();
+
+  await expect(page.getByRole('alert')).toBeVisible();
 });
 
 test('can add a new video', async ({ page }) => {
@@ -34,14 +49,12 @@ test('can add a new video', async ({ page }) => {
   await expect(page.getByText(newTitle)).toBeVisible();
 });
 
-test('clicking a video navigates to the detail page', async ({ page, request }) => {
-  const video = await createVideo(request, { title: 'Detail Page Video', duration: 180 });
-
+test('clicking a video navigates to the detail page', async ({ page }) => {
   await page.goto('/');
-  await page.getByRole('button', { name: `Watch ${video.title}` }).click();
+  await page.getByRole('button', { name: `Watch ${firstVideo.title}` }).click();
 
-  await expect(page).toHaveURL(new RegExp(`/video/${video.id}`));
-  await expect(page.getByRole('heading', { name: video.title })).toBeVisible();
+  await expect(page).toHaveURL(new RegExp(`/video/${firstVideo.id}`));
+  await expect(page.getByRole('heading', { name: firstVideo.title })).toBeVisible();
 });
 
 test('shows error on detail page when video does not exist', async ({ page }) => {
