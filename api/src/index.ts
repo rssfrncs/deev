@@ -10,6 +10,8 @@ const server = Fastify({ logger: true });
 async function main() {
   await server.register(cors, { origin: true });
 
+  server.get('/health', async () => ({ ok: true }));
+
   await server.register(fastifyTRPCPlugin, {
     prefix: '/trpc',
     trpcOptions: {
