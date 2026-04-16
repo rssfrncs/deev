@@ -16,7 +16,7 @@
     "jsx": "react-jsx",
 
     "paths": {
-      "veed-api/src/appRouter": ["../../api/src/appRouter.ts"]
+      "veed-api/src/appRouter": ["../api/src/appRouter.ts"]
     },
 
     /* Linting */
