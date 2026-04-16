@@ -1,6 +1,5 @@
 import { buffers, eventChannel } from 'redux-saga';
 import { call, put, select, take, takeLatest, takeLeading, cancelled } from 'typed-redux-saga';
-
 function playSuccessSound() {
   const ctx = new AudioContext();
   [523.25, 659.25, 783.99].forEach((freq, i) => {
@@ -67,7 +66,7 @@ function* fetchVideosSaga(action: Extract<AppAction, { type: '[routing] navigate
         { signal: controller.signal }
       )
     );
-    yield* put<AppAction>({ type: '[effects] videos fetched', payload: result });
+    yield* put<AppAction>({ type: '[effects] videos fetched', payload: { items: (result.items ?? []) as Video[], nextCursor: (result.nextCursor ?? null) as string | null, total: (result.total ?? 0) as number } });
   } catch (err) {
     if (!(err instanceof Error && err.name === 'AbortError')) {
       const message = 'Failed to load videos';
@@ -123,7 +122,7 @@ function* loadMoreSaga() {
         { signal: controller.signal }
       )
     );
-    yield* put<AppAction>({ type: '[effects] more videos fetched', payload: result });
+    yield* put<AppAction>({ type: '[effects] more videos fetched', payload: { items: (result.items ?? []) as Video[], nextCursor: (result.nextCursor ?? null) as string | null, total: (result.total ?? 0) as number } });
   } catch {
     // Silent failure — sentinel will re-trigger on next scroll
   } finally {
