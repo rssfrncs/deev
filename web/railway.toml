@@ -1,6 +1,6 @@
 [build]
 builder = "railpack"
-buildCommand = "npm install && npm run build"
+buildCommand = "cd ./web && npm install && npm run build"
 
 [deploy]
-startCommand = "npx serve -s dist --listen $PORT"
+startCommand = "cd ./web && npx serve -s dist --listen $PORT"
