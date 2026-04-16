@@ -1,7 +1,7 @@
 import { useState, useEffect, lazy, Suspense } from 'react';
 import { useAppSelector, useAppDispatch } from '../store/hooks';
 
-const HlsPlayer = lazy(() => import('../HlsPlayer').then(m => ({ default: m.HlsPlayer })));
+const HlsPlayerDetail = lazy(() => import('../HlsPlayer').then(m => ({ default: m.HlsPlayerDetail })));
 import { formatDuration, formatViews } from '../utils/format';
 import type { Video } from '../store/state';
 
@@ -70,7 +70,7 @@ export function VideoDetailPage() {
                 style={{ opacity: videoReady ? 1 : 0 }}
               >
                 <Suspense fallback={null}>
-                  <HlsPlayer variant="detail" onReady={() => setVideoReady(true)} />
+                  <HlsPlayerDetail onReady={() => setVideoReady(true)} />
                 </Suspense>
               </div>
             </div>

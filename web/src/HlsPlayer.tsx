@@ -40,53 +40,58 @@ const controlBarStyle: React.CSSProperties = {
   border: '1px solid rgba(255,255,255,0.6)',
 };
 
-type Props = { variant: 'card'; onReady?: () => void } | { variant: 'detail'; onReady?: () => void };
+type SharedProps = { onReady?: () => void };
 
-export function HlsPlayer(props: Props) {
-  const elementRef = useRef<Element | null>(null);
+export function HlsPlayerCard({ onReady }: SharedProps) {
+  const elRef = useRef<Element | null>(null);
 
-  const cardRef = useCallback((el: Element | null) => {
+  const ref = useCallback((el: Element | null) => {
     if (el) {
-      elementRef.current = el;
+      elRef.current = el;
       (el as any).config = { startLevel: 0, capLevelToPlayerSize: true };
-      if (props.variant === 'card' && props.onReady) {
-        el.addEventListener('canplay', props.onReady, { once: true });
-      }
+      if (onReady) el.addEventListener('canplay', onReady, { once: true });
       (el as any).src = DEMO_HLS_SRC;
-    } else if (elementRef.current) {
-      (elementRef.current as any).src = '';
-      elementRef.current = null;
+    } else if (elRef.current) {
+      (elRef.current as any).src = '';
+      elRef.current = null;
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  if (props.variant === 'card') {
-    return (
-      <hls-video
-        ref={cardRef}
-        autoplay
-        muted
-        playsinline
-        style={{
-          width: '100%',
-          height: '100%',
-          objectFit: 'cover',
-          pointerEvents: 'none',
-        } as React.CSSProperties}
-      />
-    );
-  }
+  return (
+    <hls-video
+      ref={ref}
+      autoplay
+      muted
+      playsinline
+      style={{
+        width: '100%',
+        height: '100%',
+        objectFit: 'cover',
+        pointerEvents: 'none',
+      } as React.CSSProperties}
+    />
+  );
+}
 
-  const detailRef = useCallback((el: Element | null) => {
-    if (el && props.variant === 'detail' && props.onReady) {
-      el.addEventListener('canplay', props.onReady, { once: true });
+export function HlsPlayerDetail({ onReady }: SharedProps) {
+  const elRef = useRef<Element | null>(null);
+
+  const ref = useCallback((el: Element | null) => {
+    if (el) {
+      elRef.current = el;
+      if (onReady) el.addEventListener('canplay', onReady, { once: true });
+      (el as any).src = DEMO_HLS_SRC;
+    } else if (elRef.current) {
+      (elRef.current as any).src = '';
+      elRef.current = null;
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
     <MediaController style={{ ...theme, width: '100%', height: '100%' }}>
-      <hls-video autoplay ref={detailRef} slot="media" src={DEMO_HLS_SRC} playsinline style={{ width: '100%', height: '100%', objectFit: 'cover' } as React.CSSProperties} />
+      <hls-video autoplay ref={ref} slot="media" playsinline style={{ width: '100%', height: '100%', objectFit: 'cover' } as React.CSSProperties} />
       <MediaControlBar style={controlBarStyle}>
         <MediaPlayButton style={{ padding: '0 8px' }} />
         <MediaTimeDisplay style={{ cursor: 'default', userSelect: 'none' }} />

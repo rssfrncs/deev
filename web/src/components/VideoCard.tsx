@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, lazy, Suspense } from 'react';
 import { useAppDispatch } from '../store/hooks';
 
-const HlsPlayer = lazy(() => import('../HlsPlayer').then(m => ({ default: m.HlsPlayer })));
+const HlsPlayerCard = lazy(() => import('../HlsPlayer').then(m => ({ default: m.HlsPlayerCard })));
 import { formatDuration, formatViews, formatDate } from '../utils/format';
 import type { Video } from '../store/state';
 
@@ -60,7 +60,7 @@ export function VideoCard({ video }: { video: Video }) {
               style={{ opacity: videoReady ? 1 : 0 }}
             >
               <Suspense fallback={null}>
-                <HlsPlayer variant="card" onReady={() => setVideoReady(true)} />
+                <HlsPlayerCard onReady={() => setVideoReady(true)} />
               </Suspense>
             </div>
           )}
