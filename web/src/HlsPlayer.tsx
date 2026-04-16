@@ -20,7 +20,7 @@ const theme = {
   '--media-secondary-color': 'rgba(0,0,0,0.1)',
   '--media-background-color': 'transparent',
   '--media-control-background': 'transparent',
-  '--media-control-hover-background': 'rgba(0,0,0,0.08)',
+  '--media-control-hover-background': 'transparent',
   '--media-icon-color': '#1a1a1a',
   '--media-text-color': '#1a1a1a',
   '--media-font-family': 'SwissNow, ui-sans-serif, system-ui, -apple-system, sans-serif',
@@ -89,12 +89,12 @@ export function HlsPlayer(props: Props) {
       <hls-video autoplay ref={detailRef} slot="media" src={DEMO_HLS_SRC} playsinline style={{ width: '100%', height: '100%', objectFit: 'cover' } as React.CSSProperties} />
       <MediaControlBar style={controlBarStyle}>
         <MediaPlayButton style={{ padding: '0 8px' }} />
-        <MediaTimeDisplay />
+        <MediaTimeDisplay style={{ cursor: 'default', userSelect: 'none' }} />
         <MediaTimeRange />
-        <MediaDurationDisplay />
+        <MediaDurationDisplay style={{ cursor: 'default', userSelect: 'none' }} />
         <MediaMuteButton style={{ padding: '0 8px' }} />
         <MediaVolumeRange />
-        <MediaFullscreenButton />
+        <MediaFullscreenButton style={{ padding: '0 8px' }} />
       </MediaControlBar>
     </MediaController>
   );
