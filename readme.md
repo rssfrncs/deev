@@ -1,5 +1,13 @@
 # 📺 Video Library Dashboard
 
+## 🏁 Getting Started
+
+```bash
+npm start
+```
+
+This installs dependencies, creates `api/.env`, applies migrations, seeds the database, and starts both the API (:3000) and frontend (:5173).
+
 
 ## Live https://deev.up.railway.app/
 
@@ -30,14 +38,6 @@ A high-performance video management platform utilizing a **tRPC** backend with *
 * **DevOps/QA:** Railway.com, Playwright E2E.
 
 ---
-
-## 🏁 Getting Started
-
-```bash
-npm start
-```
-
-This installs dependencies, creates `api/.env`, applies migrations, seeds the database, and starts both the API (:3000) and frontend (:5173).
 
 ### E2E Tests (optional)
 ```bash
