@@ -1,3 +1,9 @@
 {
-  "engines": { "node": ">=20" }
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "install:all": "npm install --prefix api && npm install --prefix web",
+    "setup": "npm run install:all && cp -n api/.env.example api/.env; npm run --prefix api db:generate && npm run --prefix api db:deploy && npm run --prefix api db:seed",
+    "dev": "npm run --prefix api dev & npm run --prefix web dev",
+    "start": "npm run setup && npm run dev"
+  }
 }

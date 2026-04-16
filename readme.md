@@ -37,30 +37,15 @@ A high-performance video management platform utilizing a **tRPC** backend with *
 
 ## 🏁 Getting Started
 
-### 1. Install Dependencies
 ```bash
-cd api && npm install
-cd ../web && npm install
+npm start
 ```
 
-### 2. Backend Setup
-```bash
-cd api
-npm run db:migrate   # Initialize SQLite schema
-npm run db:seed      # Seed with provided dataset
-npm run dev          # Start tRPC server on :3000
-```
+This installs dependencies, creates `api/.env`, applies migrations, seeds the database, and starts both the API (:3000) and frontend (:5173).
 
-### 3. Frontend Setup
+### E2E Tests (optional)
 ```bash
-cd web
-npm run dev          # Start Vite SPA on :5173
-```
-
-### 4. E2E Tests (optional)
-```bash
-cd web
-npx playwright test
+cd web && npx playwright test
 ```
 
 ---

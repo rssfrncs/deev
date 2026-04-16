@@ -6,6 +6,8 @@
     "build": "prisma generate && tsc",
     "start": "prisma migrate deploy && npx tsx prisma/seed.ts && node dist/src/index.js",
     "db:migrate": "prisma migrate dev",
+    "db:generate": "prisma generate",
+    "db:deploy": "prisma migrate deploy",
     "db:seed": "tsx prisma/seed.ts",
     "db:studio": "prisma studio"
   },
