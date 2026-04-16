@@ -57,6 +57,10 @@ npm run dev          # Start Vite SPA
 ### View Counter Buffering
 To ensure the SQLite database remains performant, view increments are not written immediately. Instead, they are accumulated in memory and flushed in batches, reducing the write load from $N$ to 1 per interval.
 
+### Pagiation
+
+Pagination was a core requirement due to the list functionality. Cursor based pagination is used to allow more dynamic infinite scroll implementations. 
+
 ### Redux Action Schema
 The application uses a categorized action system to ensure the "entire user journey" is observable:
 * **`[ui]`**: User intents (clicks, typing, selections).
