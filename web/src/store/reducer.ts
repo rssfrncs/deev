@@ -43,6 +43,7 @@ export function rootReducer(state: AppState = initialState, action: AppAction): 
 
       case '[ui] create video submitted':
         draft.videos.creating = true;
+        draft.videos.createError = null;
         break;
 
       case '[effects] videos fetch started':
@@ -89,6 +90,7 @@ export function rootReducer(state: AppState = initialState, action: AppAction): 
 
       case '[effects] create video failed':
         draft.videos.creating = false;
+        draft.videos.createError = action.payload.error;
         break;
 
       case '[effects] video received via subscription': {

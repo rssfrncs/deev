@@ -29,11 +29,14 @@ function CreateVideoPopover() {
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
   const tagInputRef = useRef<HTMLInputElement>(null);
   const dispatch = useAppDispatch();
   const creating = useAppSelector((s) => s.videos.creating);
+  const createError = useAppSelector((s) => s.videos.createError);
   const topTags = useAppSelector((s) => s.topTags);
   const closeRef = useRef<(() => void) | null>(null);
+  const prevCreatingRef = useRef(false);
 
   const suggestions = topTags
     .map((t) => t.name)
@@ -44,17 +47,23 @@ function CreateVideoPopover() {
   useEffect(() => { setHighlightedIndex(-1); }, [tagInput]);
 
   useEffect(() => {
-    if (!creating && closeRef.current) {
-      setSuccess(true);
-      playSuccessSound();
-      const timer = setTimeout(() => {
-        setSuccess(false);
-        closeRef.current?.();
+    if (prevCreatingRef.current && !creating && closeRef.current) {
+      if (createError) {
+        setFormError(createError);
         closeRef.current = null;
-      }, 1500);
-      return () => clearTimeout(timer);
+      } else {
+        setSuccess(true);
+        playSuccessSound();
+        const timer = setTimeout(() => {
+          setSuccess(false);
+          closeRef.current?.();
+          closeRef.current = null;
+        }, 1500);
+        return () => clearTimeout(timer);
+      }
     }
-  }, [creating]);
+    prevCreatingRef.current = creating;
+  }, [creating, createError]);
 
   function addTag(value: string) {
     const tag = value.trim().toLowerCase();
@@ -94,6 +103,7 @@ function CreateVideoPopover() {
       ? [...new Set([...tags, tagInput.trim().toLowerCase()])]
       : tags;
     closeRef.current = close;
+    setFormError(null);
     dispatch({ type: '[ui] create video submitted', payload: { title, duration: Number(duration), tags: finalTags } });
     setTitle('');
     setDuration('');
@@ -164,6 +174,9 @@ function CreateVideoPopover() {
                   </li>
                 ))}
               </ul>
+            )}
+            {formError && (
+              <p role="alert" className="text-xs text-red-500 px-1">{formError}</p>
             )}
             <button
               type="submit"

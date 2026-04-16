@@ -10,6 +10,7 @@ export type VideosState = {
   total: number;
   loading: boolean;
   creating: boolean;
+  createError: string | null;
   error: string | null;
 };
 
@@ -45,6 +46,7 @@ export const initialState: AppState = {
     total: 0,
     loading: false,
     creating: false,
+    createError: null,
     error: null,
   },
   filters: {
