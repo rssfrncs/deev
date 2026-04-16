@@ -1,5 +1,23 @@
 import { buffers, eventChannel } from 'redux-saga';
 import { call, put, select, take, takeLatest, takeLeading, cancelled } from 'typed-redux-saga';
+
+function playSuccessSound() {
+  const ctx = new AudioContext();
+  [523.25, 659.25, 783.99].forEach((freq, i) => {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.type = 'sine';
+    osc.frequency.value = freq;
+    const t = ctx.currentTime + i * 0.1;
+    gain.gain.setValueAtTime(0, t);
+    gain.gain.linearRampToValueAtTime(0.18, t + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.45);
+    osc.start(t);
+    osc.stop(t + 0.45);
+  });
+}
 import { trpc } from '../../trpc';
 import type { AppAction } from '../actions';
 import type { AppState } from '../state';
@@ -116,16 +134,23 @@ function* loadMoreSaga() {
 }
 
 function* createVideoSaga(action: Extract<AppAction, { type: '[ui] create video submitted' }>) {
+  const { title, duration, tags, tagInput } = action.payload;
+  const finalTags = tagInput.trim()
+    ? [...new Set([...tags, tagInput.trim().toLowerCase()])]
+    : tags;
   try {
     const video = yield* call(() =>
       trpc.video.create.mutate({
-        title: action.payload.title,
+        title,
         thumbnailUrl: `https://picsum.photos/seed/${Math.random()}/300/200`,
-        duration: action.payload.duration,
-        tags: action.payload.tags,
+        duration,
+        tags: finalTags,
       })
     );
     yield* put<AppAction>({ type: '[effects] video created', payload: { video } });
+    playSuccessSound();
+    yield* call(() => new Promise<void>((res) => setTimeout(res, 1500)));
+    yield* put<AppAction>({ type: '[ui] create form reset' });
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Failed to create video';
     yield* put<AppAction>({ type: '[effects] create video failed', payload: { error: message } });

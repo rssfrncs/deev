@@ -8,7 +8,13 @@ export type AppAction =
   | { type: '[ui] tag filter cleared' }
   | { type: '[ui] sort order changed'; payload: { sortOrder: 'asc' | 'desc' } }
   | { type: '[ui] load more requested' }
-  | { type: '[ui] create video submitted'; payload: { title: string; duration: number; tags: string[] } }
+  | { type: '[ui] create video submitted'; payload: { title: string; duration: number; tags: string[]; tagInput: string } }
+  | { type: '[ui] create form title changed'; payload: { title: string } }
+  | { type: '[ui] create form duration changed'; payload: { duration: string } }
+  | { type: '[ui] create form tag added'; payload: { tag: string } }
+  | { type: '[ui] create form tag removed'; payload: { tag: string } }
+  | { type: '[ui] create form tag input changed'; payload: { tagInput: string } }
+  | { type: '[ui] create form reset' }
   | { type: '[ui] video selected'; payload: { id: string } }
   | { type: '[ui] navigate home' }
   | { type: '[ui] detail tag filter selected'; payload: { tag: string } }

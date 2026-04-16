@@ -44,6 +44,39 @@ export function rootReducer(state: AppState = initialState, action: AppAction): 
       case '[ui] create video submitted':
         draft.videos.creating = true;
         draft.videos.createError = null;
+        draft.createForm.title = '';
+        draft.createForm.duration = '';
+        draft.createForm.tags = [];
+        draft.createForm.tagInput = '';
+        break;
+
+      case '[ui] create form title changed':
+        draft.createForm.title = action.payload.title;
+        break;
+
+      case '[ui] create form duration changed':
+        draft.createForm.duration = action.payload.duration;
+        break;
+
+      case '[ui] create form tag added': {
+        const tag = action.payload.tag.trim().toLowerCase();
+        if (tag && !draft.createForm.tags.includes(tag)) {
+          draft.createForm.tags.push(tag);
+        }
+        draft.createForm.tagInput = '';
+        break;
+      }
+
+      case '[ui] create form tag removed':
+        draft.createForm.tags = draft.createForm.tags.filter((t) => t !== action.payload.tag);
+        break;
+
+      case '[ui] create form tag input changed':
+        draft.createForm.tagInput = action.payload.tagInput;
+        break;
+
+      case '[ui] create form reset':
+        draft.createForm.success = false;
         break;
 
       case '[effects] videos fetch started':
@@ -81,6 +114,7 @@ export function rootReducer(state: AppState = initialState, action: AppAction): 
 
       case '[effects] video created':
         draft.videos.creating = false;
+        draft.createForm.success = true;
         draft.videoCache[action.payload.video.id] = action.payload.video;
         if (!draft.videos.items.some((v) => v.id === action.payload.video.id)) {
           draft.videos.items.unshift(action.payload.video);

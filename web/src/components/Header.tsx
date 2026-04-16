@@ -2,41 +2,18 @@ import { useState, useEffect, useRef } from 'react';
 import { Popover, PopoverButton, PopoverPanel } from '@headlessui/react';
 import { useAppSelector, useAppDispatch } from '../store/hooks';
 
-function playSuccessSound() {
-  const ctx = new AudioContext();
-  // C5 → E5 → G5 soft major arpeggio
-  [523.25, 659.25, 783.99].forEach((freq, i) => {
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-    osc.type = 'sine';
-    osc.frequency.value = freq;
-    const t = ctx.currentTime + i * 0.1;
-    gain.gain.setValueAtTime(0, t);
-    gain.gain.linearRampToValueAtTime(0.18, t + 0.02);
-    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.45);
-    osc.start(t);
-    osc.stop(t + 0.45);
-  });
-}
-
 function CreateVideoPopover() {
-  const [title, setTitle] = useState('');
-  const [duration, setDuration] = useState('');
-  const [tags, setTags] = useState<string[]>([]);
-  const [tagInput, setTagInput] = useState('');
-  const [highlightedIndex, setHighlightedIndex] = useState(-1);
-  const [showSuggestions, setShowSuggestions] = useState(false);
-  const [success, setSuccess] = useState(false);
-  const [formError, setFormError] = useState<string | null>(null);
-  const tagInputRef = useRef<HTMLInputElement>(null);
   const dispatch = useAppDispatch();
+  const { title, duration, tags, tagInput, success } = useAppSelector((s) => s.createForm);
   const creating = useAppSelector((s) => s.videos.creating);
   const createError = useAppSelector((s) => s.videos.createError);
   const topTags = useAppSelector((s) => s.topTags);
+
+  const [highlightedIndex, setHighlightedIndex] = useState(-1);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const tagInputRef = useRef<HTMLInputElement>(null);
   const closeRef = useRef<(() => void) | null>(null);
-  const prevCreatingRef = useRef(false);
+  const prevSuccessRef = useRef(false);
 
   const suggestions = topTags
     .map((t) => t.name)
@@ -46,30 +23,14 @@ function CreateVideoPopover() {
 
   useEffect(() => { setHighlightedIndex(-1); }, [tagInput]);
 
+  // Close the popover once the saga's 1500ms success window ends
   useEffect(() => {
-    if (prevCreatingRef.current && !creating && closeRef.current) {
-      if (createError) {
-        setFormError(createError);
-        closeRef.current = null;
-      } else {
-        setSuccess(true);
-        playSuccessSound();
-        const timer = setTimeout(() => {
-          setSuccess(false);
-          closeRef.current?.();
-          closeRef.current = null;
-        }, 1500);
-        return () => clearTimeout(timer);
-      }
+    if (prevSuccessRef.current && !success && closeRef.current) {
+      closeRef.current();
+      closeRef.current = null;
     }
-    prevCreatingRef.current = creating;
-  }, [creating, createError]);
-
-  function addTag(value: string) {
-    const tag = value.trim().toLowerCase();
-    if (tag && !tags.includes(tag)) setTags((prev) => [...prev, tag]);
-    setTagInput('');
-  }
+    prevSuccessRef.current = success;
+  }, [success]);
 
   function handleTagKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
     if (e.key === 'ArrowDown') {
@@ -82,33 +43,21 @@ function CreateVideoPopover() {
       setShowSuggestions(false);
     } else if (e.key === 'Enter') {
       e.preventDefault();
-      if (highlightedIndex >= 0 && suggestions[highlightedIndex]) {
-        addTag(suggestions[highlightedIndex]);
-      } else {
-        addTag(tagInput);
-      }
+      dispatch({ type: '[ui] create form tag added', payload: { tag: highlightedIndex >= 0 && suggestions[highlightedIndex] ? suggestions[highlightedIndex] : tagInput } });
       setHighlightedIndex(-1);
     } else if (e.key === ',') {
       e.preventDefault();
-      addTag(tagInput);
+      dispatch({ type: '[ui] create form tag added', payload: { tag: tagInput } });
       setHighlightedIndex(-1);
     } else if (e.key === 'Backspace' && !tagInput) {
-      setTags((prev) => prev.slice(0, -1));
+      dispatch({ type: '[ui] create form tag removed', payload: { tag: tags[tags.length - 1] } });
     }
   }
 
   function handleSubmit(e: React.FormEvent, close: () => void) {
     e.preventDefault();
-    const finalTags = tagInput.trim()
-      ? [...new Set([...tags, tagInput.trim().toLowerCase()])]
-      : tags;
     closeRef.current = close;
-    setFormError(null);
-    dispatch({ type: '[ui] create video submitted', payload: { title, duration: Number(duration), tags: finalTags } });
-    setTitle('');
-    setDuration('');
-    setTags([]);
-    setTagInput('');
+    dispatch({ type: '[ui] create video submitted', payload: { title, duration: Number(duration), tags, tagInput } });
   }
 
   return (
@@ -126,7 +75,7 @@ function CreateVideoPopover() {
               className="rounded-xl bg-input-bg px-4 py-2.5 text-sm text-ink placeholder-ink-tertiary focus:outline-none"
               placeholder="Video title"
               value={title}
-              onChange={(e) => setTitle(e.target.value)}
+              onChange={(e) => dispatch({ type: '[ui] create form title changed', payload: { title: e.target.value } })}
               autoFocus
               required
             />
@@ -136,7 +85,7 @@ function CreateVideoPopover() {
               type="number"
               min="1"
               value={duration}
-              onChange={(e) => setDuration(e.target.value)}
+              onChange={(e) => dispatch({ type: '[ui] create form duration changed', payload: { duration: e.target.value } })}
               required
             />
             <div
@@ -146,7 +95,7 @@ function CreateVideoPopover() {
               {tags.map((tag) => (
                 <span key={tag} className="inline-flex items-center gap-1 text-xs bg-canvas border border-border px-2 py-0.5 rounded-pill text-ink-secondary">
                   {tag}
-                  <button type="button" onClick={() => setTags((prev) => prev.filter((t) => t !== tag))} aria-label={`Remove ${tag} tag`} className="hover:text-ink leading-none">×</button>
+                  <button type="button" onClick={() => dispatch({ type: '[ui] create form tag removed', payload: { tag } })} aria-label={`Remove ${tag} tag`} className="hover:text-ink leading-none">×</button>
                 </span>
               ))}
               <input
@@ -154,7 +103,7 @@ function CreateVideoPopover() {
                 className="flex-1 min-w-[80px] bg-transparent text-sm text-ink placeholder-ink-tertiary focus:outline-none"
                 placeholder={tags.length === 0 ? 'Tags (Enter to add)' : ''}
                 value={tagInput}
-                onChange={(e) => setTagInput(e.target.value)}
+                onChange={(e) => dispatch({ type: '[ui] create form tag input changed', payload: { tagInput: e.target.value } })}
                 onKeyDown={handleTagKeyDown}
                 onFocus={() => setShowSuggestions(true)}
                 onBlur={() => { setShowSuggestions(false); setHighlightedIndex(-1); }}
@@ -165,7 +114,7 @@ function CreateVideoPopover() {
                 {suggestions.map((name, i) => (
                   <li
                     key={name}
-                    onMouseDown={(e) => { e.preventDefault(); addTag(name); setHighlightedIndex(-1); }}
+                    onMouseDown={(e) => { e.preventDefault(); dispatch({ type: '[ui] create form tag added', payload: { tag: name } }); setHighlightedIndex(-1); }}
                     className={`px-3 py-2 text-sm cursor-pointer transition-colors ${
                       i === highlightedIndex ? 'bg-veed-green text-ink' : 'text-ink-secondary hover:bg-surface'
                     }`}
@@ -175,8 +124,8 @@ function CreateVideoPopover() {
                 ))}
               </ul>
             )}
-            {formError && (
-              <p role="alert" className="text-xs text-red-500 px-1">{formError}</p>
+            {createError && (
+              <p role="alert" className="text-xs text-red-500 px-1">{createError}</p>
             )}
             <button
               type="submit"

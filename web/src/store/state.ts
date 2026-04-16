@@ -29,6 +29,14 @@ export type VideoDetailState = {
 
 export type Tag = { name: string; count: number };
 
+export type CreateFormState = {
+  title: string;
+  duration: string;
+  tags: string[];
+  tagInput: string;
+  success: boolean;
+};
+
 export type AppState = {
   route: Route;
   videos: VideosState;
@@ -36,6 +44,7 @@ export type AppState = {
   filters: FiltersState;
   videoDetail: VideoDetailState;
   topTags: Tag[];
+  createForm: CreateFormState;
 };
 
 export const initialState: AppState = {
@@ -62,4 +71,11 @@ export const initialState: AppState = {
     relatedIds: [],
   },
   topTags: [],
+  createForm: {
+    title: '',
+    duration: '',
+    tags: [],
+    tagInput: '',
+    success: false,
+  },
 };
