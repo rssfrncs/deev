@@ -1,5 +1,7 @@
 # 📺 Video Library Dashboard
 
+## Live https://deev.up.railway.app/
+
 ### ⚡ Professional Event-Driven Full-Stack System
 A high-performance video management platform utilizing a **tRPC** backend with **Prisma/SQLite**, a **Redux Saga** event-driven frontend, and **Server-Sent Events** (SSE) for real-time synchronization.
 
