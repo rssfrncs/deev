@@ -52,7 +52,7 @@ function* fetchVideosSaga(action: Extract<AppAction, { type: '[routing] navigate
     yield* put<AppAction>({ type: '[effects] videos fetched', payload: result });
   } catch (err) {
     if (!(err instanceof Error && err.name === 'AbortError')) {
-      const message = err instanceof Error ? err.message : 'Failed to load videos';
+      const message = 'Failed to load videos';
       yield* put<AppAction>({ type: '[effects] videos fetch failed', payload: { error: message } });
     }
   } finally {
