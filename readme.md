@@ -67,6 +67,10 @@ The application uses a categorized action system to ensure the "entire user jour
 * **`[routing]`**: Navigation and history state changes.
 * **`[effects]`**: Results from the tRPC layer (success/failure) and real-time subscription events.
 
+### Database
+
+SQLite was picked for it's simplicity. In production / future work we would swap to Postgres. This migration should be a simple change due to using Prisma.
+
 ---
 
 ## 🧪 Testing
