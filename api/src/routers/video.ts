@@ -1,3 +1,4 @@
+import { randomUUID } from 'crypto';
 import { z } from 'zod';
 import { publicProcedure, router } from '../trpc';
 import { db } from '../db';
@@ -114,7 +115,7 @@ export const videoRouter = router({
       const video = await db.video.create({
         data: {
           ...rest,
-          id: id ?? crypto.randomUUID(),
+          id: id ?? randomUUID(),
           createdAt: createdAt ? new Date(createdAt) : new Date(),
           tags: {
             connectOrCreate: tags.map((name) => ({
