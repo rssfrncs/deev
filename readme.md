@@ -24,6 +24,7 @@ A high-performance video management platform utilizing a **tRPC** backend with *
 * **Event-Driven Architecture:** Uses a strict Action-naming convention (`[ui]`, `[routing]`, `[effects]`) to provide a clear audit trail of system state changes.
 * **Centralized Side Effects:** Sagas manage complex async flows, including tRPC subscriptions, pagination logic, and debounced search inputs.
 * **Declarative Routing:** Navigation is treated as a first-class citizen in the Redux state, allowing the UI to react to URL changes via a specialized routing saga.
+* **Mobile-First UI:** Responsive grid layout and touch-friendly controls designed for mobile first, scaling up to desktop.
 
 ---
 
